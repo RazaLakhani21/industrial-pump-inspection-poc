@@ -1,0 +1,310 @@
+<!doctype html>
+<html>
+<head>
+<title>AI Motor Inspection Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  font-family:Inter,sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  margin:0;
+  padding:30px;
+  color:white;
+}
+
+.container{
+  max-width:1200px;
+  margin:auto;
+}
+
+h1{
+  margin-bottom:8px;
+  font-size:26px;
+}
+
+.sub{
+  opacity:.7;
+  font-size:14px;
+  margin-bottom:24px;
+}
+
+.aws-badge{
+  display:inline-block;
+  padding:8px 14px;
+  border-radius:20px;
+  background:linear-gradient(90deg,#9333ea,#3b82f6);
+  font-size:12px;
+  font-weight:600;
+  margin-bottom:20px;
+}
+
+/* ---------- cards ---------- */
+
+.card{
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(12px);
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:20px;
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 8px 30px rgba(0,0,0,0.35);
+}
+
+/* ---------- metrics grid ---------- */
+
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+}
+
+.metric{
+  background:rgba(255,255,255,0.08);
+  padding:18px;
+  border-radius:14px;
+  transition:.25s;
+}
+
+.metric:hover{
+  transform:translateY(-4px);
+}
+
+.metric label{
+  font-size:12px;
+  opacity:.7;
+}
+
+.metric .val{
+  font-size:28px;
+  font-weight:700;
+  margin-top:6px;
+}
+
+/* ---------- severity badge ---------- */
+
+.badge{
+  padding:6px 14px;
+  border-radius:999px;
+  font-weight:600;
+  font-size:13px;
+}
+
+.ok{background:#16a34a33;color:#4ade80;}
+.warn{background:#f59e0b33;color:#fbbf24;}
+.crit{background:#ef444433;color:#f87171;}
+
+/* ---------- rust gauge ---------- */
+
+.gauge{
+  height:18px;
+  border-radius:999px;
+  background:#1f2937;
+  overflow:hidden;
+  margin-top:10px;
+}
+
+.gauge-fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#22c55e,#eab308,#ef4444);
+  transition:width 1.2s ease;
+}
+
+/* ---------- comparison slider ---------- */
+
+.slider-box{
+  position:relative;
+  width:100%;
+  max-width:620px;
+  height:420px;
+  overflow:hidden;
+  border-radius:14px;
+  border:1px solid #334155;
+  margin:auto;
+}
+
+.slider-box img{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#020617;
+}
+
+.top-img{
+  clip-path:inset(0 50% 0 0);
+}
+
+/* ---------- heatmaps ---------- */
+
+.img-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+.img-panel img{
+  width:100%;
+  max-height:420px;
+  object-fit:contain;
+  border-radius:14px;
+  border:1px solid #334155;
+  background:#020617;
+}
+
+/* ---------- report ---------- */
+
+.report{
+  background:#0b1220;
+  padding:20px;
+  border-radius:14px;
+  border:1px solid #1e293b;
+}
+
+.report h3{
+  margin-top:0;
+}
+
+pre{
+  white-space:pre-wrap;
+  font-size:14px;
+  line-height:1.6;
+  margin:0;
+}
+
+/* ---------- footer link ---------- */
+
+a{
+  color:#93c5fd;
+  font-weight:600;
+  text-decoration:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🤖 AI Motor Inspection Dashboard</h1>
+<div class="sub">Automated visual analysis & enterprise-grade report generation</div>
+
+<div class="aws-badge">
+☁ AWS Bedrock • Claude 3.5 Sonnet • ap-south-1
+</div>
+
+<!-- ================= METRICS ================= -->
+
+<div class="card">
+<div class="metrics">
+
+<div class="metric">
+<label>Similarity</label>
+<div class="val">{{ "%.3f"|format(metrics.similarity) }}</div>
+</div>
+
+<div class="metric">
+<label>Change %</label>
+<div class="val">{{ "%.1f"|format(metrics.change_percent) }}%</div>
+</div>
+
+<div class="metric">
+<label>Regions Detected</label>
+<div class="val">{{ metrics.regions }}</div>
+</div>
+
+<div class="metric">
+<label>Rust (After)</label>
+<div class="val">{{ "%.1f"|format(metrics.after_rust_pct) }}%</div>
+</div>
+
+</div>
+</div>
+
+<!-- ================= CONDITION ================= -->
+
+<div class="card">
+<b>Condition Assessment</b><br><br>
+
+{% if metrics.after_rust_pct < 15 %}
+<span class="badge ok">Healthy Condition</span>
+{% elif metrics.after_rust_pct < 40 %}
+<span class="badge warn">Moderate Degradation</span>
+{% else %}
+<span class="badge crit">Critical Rust Detected</span>
+{% endif %}
+
+<div class="gauge">
+<div class="gauge-fill" id="rustGauge"></div>
+</div>
+</div>
+
+<!-- ================= COMPARISON ================= -->
+
+<div class="card">
+<b>Before ↔ After Visual Comparison</b><br><br>
+
+<div class="slider-box">
+<img src="{{ after_original }}">
+<img src="{{ before_original }}" class="top-img" id="topImg">
+</div>
+
+<br>
+
+<input type="range" min="0" max="100" value="50"
+oninput="slide(this.value)" style="width:100%">
+</div>
+
+<!-- ================= HEATMAPS ================= -->
+
+<div class="card">
+<b>AI Structural Heatmaps</b><br><br>
+
+<div class="img-grid">
+
+<div class="img-panel">
+Before Heatmap
+<img src="{{ before_heatmap_image }}">
+</div>
+
+<div class="img-panel">
+Change Heatmap
+<img src="{{ heatmap_image }}">
+</div>
+
+</div>
+</div>
+
+<!-- ================= BEDROCK REPORT ================= -->
+
+<div class="card report">
+<h3>📄 Enterprise Inspection Report (Claude 3.5 Sonnet)</h3>
+<pre>{{ bedrock_report }}</pre>
+</div>
+
+<br>
+<a href="/">← Analyze Another Pair</a>
+
+</div>
+
+<script>
+
+function slide(v){
+  document.getElementById("topImg").style.clipPath=
+  `inset(0 ${100-v}% 0 0)`;
+}
+
+window.onload=()=>{
+  document.getElementById("rustGauge").style.width=
+  "{{ [metrics.after_rust_pct,100]|min }}%";
+};
+
+</script>
+
+</body>
+</html>

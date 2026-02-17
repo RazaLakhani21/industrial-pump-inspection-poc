@@ -1,0 +1,230 @@
+<!doctype html>
+<html>
+<head>
+<title>AI Before–After Analyzer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+/* ----------- main card ----------- */
+
+.card{
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(14px);
+  padding:32px;
+  border-radius:20px;
+  width:540px;
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+
+h2{margin:0 0 6px 0}
+
+.subtitle{
+  opacity:.75;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+/* ----------- AI badge ----------- */
+
+.ai-badge{
+  background:linear-gradient(90deg,#9333ea,#3b82f6);
+  padding:8px 14px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:600;
+  display:inline-block;
+  margin-bottom:18px;
+  letter-spacing:.4px;
+}
+
+/* ----------- drop zones ----------- */
+
+.drop-zone{
+  border:2px dashed #334155;
+  border-radius:14px;
+  padding:22px;
+  text-align:center;
+  cursor:pointer;
+  margin-bottom:18px;
+  transition:.25s;
+  background:#020617;
+}
+
+.drop-zone:hover{
+  border-color:#3b82f6;
+  background:#020617cc;
+}
+
+.drop-zone input{display:none}
+
+.preview{
+  margin-top:12px;
+  max-height:160px;
+  max-width:100%;
+  border-radius:10px;
+  display:none;
+}
+
+/* ----------- button ----------- */
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  background:linear-gradient(90deg,#2563eb,#06b6d4);
+  color:white;
+  transition:.25s;
+}
+
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 30px rgba(37,99,235,0.5);
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+/* ----------- loader ----------- */
+
+.loader-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(2,6,23,.94);
+  backdrop-filter:blur(6px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  z-index:9999;
+}
+
+.spinner{
+  width:70px;
+  height:70px;
+  border:5px solid #1f2937;
+  border-top:5px solid #38bdf8;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin-bottom:18px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.loader-text{
+  font-size:18px;
+  font-weight:600;
+  opacity:.9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>🤖 Before–After AI Analyzer</h2>
+
+  <div class="subtitle">
+    Upload two images for automated inspection
+  </div>
+
+  <!-- Bedrock Badge -->
+  <div class="ai-badge">
+    ☁ Powered by AWS Bedrock • Claude 3.54 Sonnet • ap-south-1
+  </div>
+
+  <form id="analyzeForm" action="/analyze" method="post" enctype="multipart/form-data">
+
+    <label>Before Image</label>
+    <div class="drop-zone" onclick="pick('before')">
+      📷 Click or drag image here
+      <input type="file" name="before" id="before" accept="image/*" required/>
+      <img id="beforePreview" class="preview"/>
+    </div>
+
+    <label>After Image</label>
+    <div class="drop-zone" onclick="pick('after')">
+      📷 Click or drag image here
+      <input type="file" name="after" id="after" accept="image/*" required/>
+      <img id="afterPreview" class="preview"/>
+    </div>
+
+    <button type="submit" id="analyzeBtn">
+      Generate AI Inspection Report →
+    </button>
+
+  </form>
+</div>
+
+<!-- Loader -->
+
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-text">
+    Generating report via Claude 3.5 Sonnet...
+  </div>
+</div>
+
+<script>
+
+function pick(id){
+  document.getElementById(id).click();
+}
+
+function preview(inputId,previewId){
+  const file=document.getElementById(inputId).files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById(previewId);
+    img.src=e.target.result;
+    img.style.display="block";
+  };
+  reader.readAsDataURL(file);
+}
+
+before.onchange=()=>preview("before","beforePreview");
+after.onchange=()=>preview("after","afterPreview");
+
+document.getElementById("analyzeForm").addEventListener("submit",function(e){
+
+  if(!before.files.length||!after.files.length){
+    alert("Please upload both images");
+    e.preventDefault();
+    return;
+  }
+
+  document.getElementById("loader").style.display="flex";
+
+  const btn=document.getElementById("analyzeBtn");
+  btn.disabled=true;
+  btn.innerText="Generating Report...";
+
+});
+
+</script>
+
+</body>
+</html>
