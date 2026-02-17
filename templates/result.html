@@ -54,7 +54,7 @@ h1{
   box-shadow:0 8px 30px rgba(0,0,0,0.35);
 }
 
-/* ---------- metrics grid ---------- */
+/* ---------- metrics ---------- */
 
 .metrics{
   display:grid;
@@ -84,7 +84,7 @@ h1{
   margin-top:6px;
 }
 
-/* ---------- severity badge ---------- */
+/* ---------- badges ---------- */
 
 .badge{
   padding:6px 14px;
@@ -156,34 +156,59 @@ h1{
   background:#020617;
 }
 
-/* ---------- report ---------- */
+/* ---------- REPORT STYLING ---------- */
 
 .report{
   background:#0b1220;
-  padding:20px;
+  padding:25px;
   border-radius:14px;
   border:1px solid #1e293b;
 }
 
-.report h3{
-  margin-top:0;
+.report-content h1{
+  font-size:22px;
+  margin-bottom:10px;
+  border-bottom:1px solid #334155;
+  padding-bottom:8px;
 }
 
-pre{
-  white-space:pre-wrap;
-  font-size:14px;
-  line-height:1.6;
-  margin:0;
+.report-content h2{
+  font-size:18px;
+  margin-top:22px;
+  margin-bottom:10px;
+  color:#93c5fd;
 }
 
-/* ---------- footer link ---------- */
+.report-content h3{
+  font-size:16px;
+  margin-top:18px;
+  margin-bottom:8px;
+  color:#c084fc;
+}
+
+.report-content strong{
+  color:#facc15;
+}
+
+.report-content ul{
+  padding-left:20px;
+  margin-top:8px;
+}
+
+.report-content li{
+  margin-bottom:6px;
+}
+
+.report-content p{
+  line-height:1.7;
+  margin-bottom:12px;
+}
 
 a{
   color:#93c5fd;
   font-weight:600;
   text-decoration:none;
 }
-
 </style>
 </head>
 
@@ -195,10 +220,10 @@ a{
 <div class="sub">Automated visual analysis & enterprise-grade report generation</div>
 
 <div class="aws-badge">
-☁ AWS Bedrock • Claude 3.5 Sonnet • ap-south-1
+☁ AWS Bedrock • Claude Sonnet • us-east-1
 </div>
 
-<!-- ================= METRICS ================= -->
+<!-- METRICS -->
 
 <div class="card">
 <div class="metrics">
@@ -226,7 +251,7 @@ a{
 </div>
 </div>
 
-<!-- ================= CONDITION ================= -->
+<!-- CONDITION -->
 
 <div class="card">
 <b>Condition Assessment</b><br><br>
@@ -244,47 +269,13 @@ a{
 </div>
 </div>
 
-<!-- ================= COMPARISON ================= -->
-
-<div class="card">
-<b>Before ↔ After Visual Comparison</b><br><br>
-
-<div class="slider-box">
-<img src="{{ after_original }}">
-<img src="{{ before_original }}" class="top-img" id="topImg">
-</div>
-
-<br>
-
-<input type="range" min="0" max="100" value="50"
-oninput="slide(this.value)" style="width:100%">
-</div>
-
-<!-- ================= HEATMAPS ================= -->
-
-<div class="card">
-<b>AI Structural Heatmaps</b><br><br>
-
-<div class="img-grid">
-
-<div class="img-panel">
-Before Heatmap
-<img src="{{ before_heatmap_image }}">
-</div>
-
-<div class="img-panel">
-Change Heatmap
-<img src="{{ heatmap_image }}">
-</div>
-
-</div>
-</div>
-
-<!-- ================= BEDROCK REPORT ================= -->
+<!-- REPORT -->
 
 <div class="card report">
-<h3>📄 Enterprise Inspection Report (Claude 3.5 Sonnet)</h3>
-<pre>{{ bedrock_report }}</pre>
+<h3>📄 Enterprise Inspection Report</h3>
+<div class="report-content">
+{{ bedrock_report | safe }}
+</div>
 </div>
 
 <br>
@@ -293,17 +284,10 @@ Change Heatmap
 </div>
 
 <script>
-
-function slide(v){
-  document.getElementById("topImg").style.clipPath=
-  `inset(0 ${100-v}% 0 0)`;
-}
-
 window.onload=()=>{
   document.getElementById("rustGauge").style.width=
   "{{ [metrics.after_rust_pct,100]|min }}%";
 };
-
 </script>
 
 </body>

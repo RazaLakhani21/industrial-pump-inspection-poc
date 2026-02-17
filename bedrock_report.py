@@ -4,10 +4,10 @@ import json
 #Create Bedrock Runtime Client
 bedrock = boto3.client(
     service_name = "bedrock-runtime",
-    region_name = "us-east-2"
+    region_name = "us-east-1"
 )
 
-MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0"
+MODEL_ID = "arn:aws:bedrock:us-east-1:778272866661:inference-profile/global.anthropic.claude-sonnet-4-20250514-v1:0"
 
 def generate_bedrock_report(comparison_json):
     structured_data = json.dumps(comparison_json, indent=2)
@@ -22,7 +22,7 @@ def generate_bedrock_report(comparison_json):
         Generate a professional inspection report.
 
         Requirements:
-        - Max 650 words
+        - Max 1 words
         - Mention rust change clearly
         - Mention affected zones
         - State overall condition (Improved / Degraded / Stable)
