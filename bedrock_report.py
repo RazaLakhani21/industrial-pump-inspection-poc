@@ -22,7 +22,7 @@ def generate_bedrock_report(comparison_json):
         Generate a professional inspection report.
 
         Requirements:
-        - Max 180 words
+        - Max 650 words
         - Mention rust change clearly
         - Mention affected zones
         - State overall condition (Improved / Degraded / Stable)
